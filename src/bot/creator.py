@@ -1,3 +1,4 @@
+import redis.asyncio as redis
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -10,6 +11,11 @@ from bot.utils import settings
 def create_dispatcher() -> Dispatcher:
     dp = Dispatcher()
     dp.include_router(router)
+    dp.redis = redis.Redis(
+        host=settings.redis.host,
+        port=settings.redis.port,
+        db=settings.redis.db,
+    )
 
     return dp
 

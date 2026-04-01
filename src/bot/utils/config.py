@@ -1,8 +1,15 @@
 from pathlib import Path
 
+from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+
+class Redis(BaseModel):
+    host: str
+    port: int
+    db: int
 
 
 class Settings(BaseSettings):
@@ -17,6 +24,8 @@ class Settings(BaseSettings):
     )
     token: str
     proxy_url: str
+    api_url: str
+    redis: Redis
 
 
 settings = Settings()
