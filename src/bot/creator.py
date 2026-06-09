@@ -3,20 +3,29 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.redis import RedisStorage
 
 from bot.handlers import router
 from bot.utils import settings
 
 
-def create_dispatcher() -> Dispatcher:
-    dp = Dispatcher()
-    dp.include_router(router)
-    dp.redis = redis.Redis(
+def get_redis_client() -> redis.Redis:
+    return redis.Redis(
         host=settings.redis.host,
         port=settings.redis.port,
         db=settings.redis.db,
+        decode_responses=True,
     )
 
+
+def create_dispatcher() -> Dispatcher:
+    redis_client = get_redis_client()
+    fsm_storage = RedisStorage(redis=redis_client)
+
+    dp = Dispatcher(storage=fsm_storage)
+    dp.workflow_data["redis"] = redis_client
+
+    dp.include_router(router)
     return dp
 
 
@@ -37,4 +46,5 @@ def create_bot() -> Bot:
                 parse_mode=ParseMode.HTML,
             ),
         )
+
     return bot
