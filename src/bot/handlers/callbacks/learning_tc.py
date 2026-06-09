@@ -158,7 +158,6 @@ async def _show_original(callback: CallbackQuery, card: dict):
     await callback.message.edit_text(
         text=text,
         reply_markup=get_show_answer_kb(),
-        parse_mode="HTML",
     )
 
 
@@ -181,7 +180,6 @@ async def _show_all(callback: CallbackQuery, card: dict):
     await callback.message.edit_text(
         text=text,
         reply_markup=get_evaluation_kb(),
-        parse_mode="HTML",
     )
 
 

@@ -119,7 +119,6 @@ async def _show_ivc_original(callback: CallbackQuery, verb: dict):
     await callback.message.edit_text(
         text=text,
         reply_markup=get_show_answer_kb(),
-        parse_mode="HTML",
     )
 
 
