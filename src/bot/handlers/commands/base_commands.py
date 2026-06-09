@@ -9,7 +9,7 @@ router = Router(name=__name__)
 
 
 @router.message(Command(START_COMMAND))
-async def start_handler(message: types.Message, state: FSMContext):
+async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer(
         "Привет! 👋\n\nВыберите действие:",
@@ -18,5 +18,5 @@ async def start_handler(message: types.Message, state: FSMContext):
 
 
 @router.message(Command(HELP_COMMAND))
-async def help_handler(message: types.Message):
+async def cmd_help(message: types.Message):
     await message.answer("помощник")

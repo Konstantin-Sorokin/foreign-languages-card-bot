@@ -51,7 +51,7 @@ def get_next_tc_kb() -> InlineKeyboardMarkup:
 
     builder.button(
         text=Texts.NEXT_CARD,
-        callback_data=LearningKbCallbacks.TRANSLATION_CARDS,
+        callback_data=LearningKbCallbacks.NEXT_CARD,
     )
     return builder.as_markup()
 
