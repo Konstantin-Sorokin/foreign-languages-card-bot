@@ -1,7 +1,7 @@
 from aiogram import Router
 
 from bot.handlers.messages.add_card import router as add_card_router
-from bot.handlers.messages.learning_choice import router as select_learning_router
+from bot.handlers.messages.card_type_selection import router as select_learning_router
 
 router = Router()
 

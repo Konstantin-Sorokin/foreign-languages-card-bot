@@ -12,9 +12,9 @@ class RedisKeys:
         return f"user:{telegram_id}:verbs"
 
     @staticmethod
-    def user_index(telegram_id: int) -> str:
-        return f"user:{telegram_id}:index"
+    def pack_verbs(pack_id: int) -> str:
+        return f"pack:{pack_id}:verbs_cache"
 
     @staticmethod
-    def packs() -> str:
-        return "packs"
+    def packs_list() -> str:
+        return "packs:list"
