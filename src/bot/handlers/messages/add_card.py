@@ -93,7 +93,7 @@ async def msg_process_example(
         return
 
     await state.update_data(example=example)
-    await message.answer(Texts.INPUT_TRANSLATION_MSG)
+    await message.answer(Texts.INPUT_EXAMPLE_TRANSLATION_MSG)
     await state.set_state(AddCardStates.input_example_translation)
 
 
