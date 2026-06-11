@@ -85,9 +85,12 @@ cd foreign-languages-card-bot
 Создайте файл `.env` на основе `.env.template`
 
 ```env
-BOT_TOKEN=your_telegram_bot_token
+TOKEN=your_telegram_bot_token
+PROXY_URL=your_proxy_url (не обязательно)
 API_URL=http://api:8000/api
-REDIS_URL=redis://redis:6379/0
+REDIS__HOST=redis
+REDIS__PORT=6379
+REDIS__DB=0
 ```
 
 ### 3. Запуск через Docker Compose
