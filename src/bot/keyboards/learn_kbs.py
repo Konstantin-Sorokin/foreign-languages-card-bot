@@ -61,6 +61,6 @@ def get_next_ivc_kb() -> InlineKeyboardMarkup:
 
     builder.button(
         text=Texts.NEXT_VERB,
-        callback_data=LearningKbCallbacks.IRREGULAR_VERB_CARDS,
+        callback_data=LearningKbCallbacks.NEXT_VERB,
     )
     return builder.as_markup()

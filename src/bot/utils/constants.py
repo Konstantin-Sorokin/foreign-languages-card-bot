@@ -35,6 +35,7 @@ class LearningKbCallbacks:
     TRANSLATION_CARDS = "learn:translation"
     IRREGULAR_VERB_CARDS = "learn:verbs"
     NEXT_CARD = "learn:next"
+    NEXT_VERB = "learn:next_ivc"
     RANDOM_IVC = "learn:random_ivc"
 
 

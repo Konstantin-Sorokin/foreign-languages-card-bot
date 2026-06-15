@@ -116,7 +116,7 @@ async def cb_show_translate_and_evaluation(callback: CallbackQuery, state: FSMCo
 )
 async def cb_evaluate_know(callback: CallbackQuery, state: FSMContext, redis: Redis):
     """
-    Обрабатывает нажатие кнопки знаю с помощью _process_evaluation
+    Обрабатывает нажатие кнопки "знаю" с помощью _process_evaluation
     """
     await _process_evaluation(
         callback=callback,
@@ -135,7 +135,7 @@ async def cb_evaluate_dont_know(
     callback: CallbackQuery, state: FSMContext, redis: Redis
 ):
     """
-    Обрабатывает нажатие кнопки знаю с помощью _process_evaluation
+    Обрабатывает нажатие кнопки "не знаю" с помощью _process_evaluation
     """
     await _process_evaluation(
         callback=callback,
