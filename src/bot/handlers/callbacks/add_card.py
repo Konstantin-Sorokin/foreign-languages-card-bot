@@ -11,7 +11,7 @@ from bot.utils.constants import AddCardCallbacks, Texts
 router = Router()
 
 
-@router.callback_query(F.data == AddCardCallbacks.ADD_EXAMPLE)
+@router.callback_query(F.data == AddCardCallbacks.ADD_EXAMPLE, AddCardStates.waiting_action)
 async def cb_add_example(callback: CallbackQuery, state: FSMContext):
     """
     Обработчик нажатия кнопки 'Добавить пример' при создании карточки.
@@ -28,7 +28,8 @@ async def cb_add_example(callback: CallbackQuery, state: FSMContext):
             AddCardCallbacks.CONFIRM_WO_EXAMPLE,
             AddCardCallbacks.CONFIRM_W_EXAMPLE,
         ]
-    )
+    ),
+    AddCardStates.waiting_action,
 )
 async def cb_confirm_card(
     callback: CallbackQuery, state: FSMContext, redis: Redis
@@ -57,7 +58,7 @@ async def cb_confirm_card(
     await callback.message.answer(Texts.SUCCESS_MSG, reply_markup=get_start_kb())
 
 
-@router.callback_query(F.data == AddCardCallbacks.CANCEL)
+@router.callback_query(F.data == AddCardCallbacks.CANCEL, AddCardStates.waiting_action)
 async def cb_cancel(callback: CallbackQuery, state: FSMContext):
     """
     Обработчик для отмены добавления карточки.

@@ -74,6 +74,7 @@ async def msg_process_translation(
         text=text,
         reply_markup=build_confirm_keyboard(),
     )
+    await state.set_state(AddCardStates.waiting_action)
 
 
 @router.message(AddCardStates.input_example, F.text)
@@ -129,6 +130,4 @@ async def msg_process_example_translation(
         text=text,
         reply_markup=build_confirm_keyboard(added_example=True),
     )
-    # await state.update_data(example_translation=example_translation)
-    # await message.answer(Texts.INPUT_TRANSLATION_MSG)
-    # await state.set_state(AddCardStates.input_example_translation)
+    await state.set_state(AddCardStates.waiting_action)

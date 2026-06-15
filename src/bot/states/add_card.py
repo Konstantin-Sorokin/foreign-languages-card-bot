@@ -6,3 +6,4 @@ class AddCardStates(StatesGroup):
     input_translation = State()
     input_example = State()
     input_example_translation = State()
+    waiting_action = State()
