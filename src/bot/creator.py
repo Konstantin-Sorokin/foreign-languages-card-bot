@@ -6,6 +6,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 
 from bot.handlers import router
+from bot.middlewares import ThrottlingMiddleware
 from bot.utils import settings
 
 
@@ -24,6 +25,10 @@ def create_dispatcher() -> Dispatcher:
 
     dp = Dispatcher(storage=fsm_storage)
     dp.workflow_data["redis"] = redis_client
+
+    throttling = ThrottlingMiddleware(redis=redis_client)
+    dp.message.middleware.register(throttling)
+    dp.callback_query.middleware.register(throttling)
 
     dp.include_router(router)
     return dp
