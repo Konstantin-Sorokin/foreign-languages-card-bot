@@ -20,6 +20,9 @@ class PackService(BaseService):
             await self._sync_verbs_and_packs_to_redis()
             cached = await self.redis.get(RedisKeys.packs_list())
 
+        if not cached:
+            return []
+
         return json.loads(cached)
 
     async def get_verb(self, telegram_id: int) -> dict | None:
@@ -50,7 +53,13 @@ class PackService(BaseService):
         TTL = 60 * 60  # 1 час
         AMOUNT_VERB = 40
 
-        if not await self.redis.exists(RedisKeys.pack_verbs(pack_ids[0])):
+        # Проверяем кэш для всех pack_ids
+        need_sync = False
+        for pack_id in pack_ids:
+            if not await self.redis.exists(RedisKeys.pack_verbs(pack_id)):
+                need_sync = True
+                break
+        if need_sync:
             await self._sync_verbs_and_packs_to_redis()
 
         queue_key = RedisKeys.user_verbs(telegram_id)
