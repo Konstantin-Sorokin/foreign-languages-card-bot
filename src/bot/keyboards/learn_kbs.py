@@ -11,6 +11,7 @@ from bot.utils.constants import (
 
 
 def get_learning_choice_kb() -> InlineKeyboardMarkup:
+    """Клавиатура выбора режима обучения: 'Мои карточки' или 'Неправильные глаголы'."""
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -27,6 +28,7 @@ def get_learning_choice_kb() -> InlineKeyboardMarkup:
 
 
 def get_show_answer_kb() -> InlineKeyboardMarkup:
+    """Клавиатура с одной кнопкой 'Показать ответ'."""
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -36,6 +38,7 @@ def get_show_answer_kb() -> InlineKeyboardMarkup:
 
 
 def get_evaluation_kb() -> InlineKeyboardMarkup:
+    """Клавиатура для оценки знания карточки: 'Знаю' / 'Не знаю'."""
     builder = InlineKeyboardBuilder()
 
     builder.button(text=CardActionTexts.KNOW, callback_data=CardActionCallbacks.KNOW)
@@ -47,6 +50,7 @@ def get_evaluation_kb() -> InlineKeyboardMarkup:
 
 
 def get_next_tc_kb() -> InlineKeyboardMarkup:
+    """Клавиатура с кнопкой 'Следующая карточка' для режима Translation Cards."""
     builder = InlineKeyboardBuilder()
 
     builder.button(
@@ -57,6 +61,7 @@ def get_next_tc_kb() -> InlineKeyboardMarkup:
 
 
 def get_next_ivc_kb() -> InlineKeyboardMarkup:
+    """Клавиатура с кнопкой 'Следующий глагол' для режима Irregular Verb Cards."""
     builder = InlineKeyboardBuilder()
 
     builder.button(

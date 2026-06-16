@@ -5,6 +5,7 @@ from bot.utils.constants import StartKbTexts
 
 
 def get_start_kb() -> ReplyKeyboardMarkup:
+    """Создаёт и возвращает стартовую клавиатуру с кнопками обучения и добавления карточки."""
     builder = ReplyKeyboardBuilder()
 
     builder.button(text=StartKbTexts.LEARNING)
