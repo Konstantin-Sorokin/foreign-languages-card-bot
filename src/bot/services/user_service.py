@@ -3,24 +3,13 @@ from bot.utils import RedisKeys
 
 
 class UserService(BaseService):
-    async def _get_or_create_user(self, telegram_id: int):
-        return await self._request(
-            method="POST",
-            endpoint="users/",
-            json={"telegram_id": telegram_id},
-        )
-
-    async def _get_user_from_redis(self, telegram_id: int):
-        return await self.redis.get(RedisKeys.user_id(telegram_id))
-
-    async def _set_user_to_redis(self, telegram_id: int, user_id: int):
-        return await self.redis.setex(
-            RedisKeys.user_id(telegram_id),
-            604800,
-            str(user_id),
-        )
-
     async def get_user_id(self, telegram_id: int) -> int:
+        """
+        Возвращает ID пользователя.
+
+        Сначала проверяет кэш в Redis. Если кэш пуст — запрашивает
+        или создаёт пользователя через API и кэширует результат.
+        """
         cached = await self._get_user_from_redis(telegram_id)
         if cached:
             return int(cached)
@@ -30,3 +19,29 @@ class UserService(BaseService):
 
         await self._set_user_to_redis(telegram_id, user_id)
         return user_id
+
+    async def _get_or_create_user(self, telegram_id: int) -> dict:
+        """
+        Отправляет запрос в API для получения существующего или создания нового пользователя.
+
+        Returns:
+            Словарь с данными пользователя (ключ 'id').
+        """
+        return await self._request(
+            method="POST",
+            endpoint="users/",
+            json={"telegram_id": telegram_id},
+        )
+
+    async def _get_user_from_redis(self, telegram_id: int) -> str | None:
+        """Получает кэшированный ID пользователя из Redis."""
+        return await self.redis.get(RedisKeys.user_id(telegram_id))
+
+    async def _set_user_to_redis(self, telegram_id: int, user_id: int) -> None:
+        """Сохраняет ID пользователя в Redis с TTL 7 дней."""
+        TTL = 7 * 24 * 60 * 60  # 7 дней в секундах
+        return await self.redis.setex(
+            RedisKeys.user_id(telegram_id),
+            TTL,
+            str(user_id),
+        )
