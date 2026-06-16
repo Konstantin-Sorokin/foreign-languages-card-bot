@@ -7,15 +7,14 @@ from redis.asyncio import Redis
 
 class ThrottlingMiddleware(BaseMiddleware):
     """
-    Middleware для ограничения частоты запросов от пользователя (anti-spam).
+    Ограничивает частоту запросов от пользователя.
 
-    Лимиты:
+    Лимиты (можно настроить через rate_limits):
       - Message: 1 запрос в секунду
       - CallbackQuery: 1 запрос в 0.5 секунды
 
-    При превышении лимита запрос игнорируется.
-    Для CallbackQuery обязательно отвечаем event.answer(), чтобы Telegram не ждал.
-    Для Message вызываем event.answer() с сообщением о превышении лимита.
+    При превышении лимита запрос игнорируется (return без вызова handler).
+    Для CallbackQuery обязательно отправляется event.answer(), чтобы Telegram не ждал.
     """
 
     def __init__(self, redis: Redis):
@@ -27,7 +26,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         }
 
     async def __call__(self, handler, event, data: dict):
-        # Пропускаем события без from_user
+        """Обрабатывает входящее событие: проверяет лимит и либо пропускает, либо блокирует."""
         if not hasattr(event, "from_user") or event.from_user is None:
             return await handler(event, data)
 
@@ -41,7 +40,6 @@ class ThrottlingMiddleware(BaseMiddleware):
         now = time.time()
 
         if last is not None and (now - float(last)) < rate:
-            # Превышен лимит — отвечаем, чтобы Telegram не ждал, и игнорируем
             if isinstance(event, CallbackQuery):
                 await event.answer("⏳ Слишком часто!", show_alert=False)
             return
