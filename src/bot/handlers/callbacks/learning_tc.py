@@ -116,7 +116,7 @@ async def cb_show_translate_and_evaluation(callback: CallbackQuery, state: FSMCo
 )
 async def cb_evaluate_know(callback: CallbackQuery, state: FSMContext, redis: Redis):
     """
-    Обрабатывает нажатие кнопки знаю с помощью _process_evaluation
+    Обрабатывает нажатие кнопки "знаю" с помощью _process_evaluation
     """
     await _process_evaluation(
         callback=callback,
@@ -135,7 +135,7 @@ async def cb_evaluate_dont_know(
     callback: CallbackQuery, state: FSMContext, redis: Redis
 ):
     """
-    Обрабатывает нажатие кнопки знаю с помощью _process_evaluation
+    Обрабатывает нажатие кнопки "не знаю" с помощью _process_evaluation
     """
     await _process_evaluation(
         callback=callback,
@@ -153,7 +153,7 @@ async def _show_original(callback: CallbackQuery, card: dict):
 
     text = f"🇬🇧 <b>{original}</b>"
     if example:
-        text += f"\n\n<i>{example}</i>"
+        text += f"\n\n<b>{example}</b>"
 
     await callback.message.edit_text(
         text=text,
@@ -168,13 +168,15 @@ async def _show_all(callback: CallbackQuery, card: dict):
     example = card.get("example", "")
     example_trans = card.get("example_translation", "")
 
-    text = f"🇬🇧 <b>{original}</b>\n🇷🇺 <b>{translation}</b>"
+    text = f"🇬🇧 <b>{original}</b>\n🇷🇺 <i>{translation}</i>"
 
     if example or example_trans:
         text += "\n\n"
         if example:
-            text += f"<i>{example}</i>\n"
+            text += f"<b>{example}</b>"
         if example_trans:
+            if example:
+                text += "\n\n"
             text += f"<i>{example_trans}</i>"
 
     await callback.message.edit_text(

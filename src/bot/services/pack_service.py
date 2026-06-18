@@ -8,11 +8,10 @@ from bot.utils import RedisKeys
 class PackService(BaseService):
     async def get_packs(self) -> list:
         """
-        Возвращает мета-информацию о всех доступных паках (ID и названия).
+        Возвращает список всех доступных паков с их ID и названиями.
 
-        - Проверяет наличие кэша в Redis по ключу 'packs:list'.
-        - Если кэш отсутствует или истек, автоматически запускает
-        синхронизацию данных из БД (_sync_verbs_and_packs_to_redis).
+        Данные кэшируются в Redis. При отсутствии кэша автоматически загружает
+        данные из API через _sync_verbs_and_packs_to_redis.
         """
         cached = await self.redis.get(RedisKeys.packs_list())
 
@@ -20,12 +19,17 @@ class PackService(BaseService):
             await self._sync_verbs_and_packs_to_redis()
             cached = await self.redis.get(RedisKeys.packs_list())
 
+        if not cached:
+            return []
+
         return json.loads(cached)
 
     async def get_verb(self, telegram_id: int) -> dict | None:
         """
-        Извлекает следующий глагол из личной очереди пользователя.
-        Использует команду LPOP, что гарантирует удаление элемента из очереди при получении
+        Извлекает следующий глагол из личной очереди пользователя (LPOP).
+
+        Returns:
+            Словарь с данными глагола или None, если очередь пуста.
         """
         verb = await self.redis.lpop(RedisKeys.user_verbs(telegram_id))
 
@@ -41,16 +45,20 @@ class PackService(BaseService):
         Формирует случайную очередь глаголов для сессии обучения.
 
         Алгоритм:
-        1. Проверка кэша: если данные паков отсутствуют в Redis, берет из БД
-        2. Собирает все глаголы из указанных pack_ids в единый список.
-        3. Рандомизация: перемешивает список и отбирает определенное кол-во карт(AMOUNT_VERB).
-        4. Запись: сохраняет результат в личную очередь пользователя с TTL.
+        1. Проверяет кэш паков в Redis; при отсутствии загружает из API.
+        2. Собирает все глаголы из указанных pack_ids.
+        3. Перемешивает и отбирает определенное кол-во глаголов - AMOUNT_VERB.
+        4. Сохраняет результат в личную очередь пользователя на время TTL.
         """
-
         TTL = 60 * 60  # 1 час
         AMOUNT_VERB = 40
 
-        if not await self.redis.exists(RedisKeys.pack_verbs(pack_ids[0])):
+        need_sync = False
+        for pack_id in pack_ids:
+            if not await self.redis.exists(RedisKeys.pack_verbs(pack_id)):
+                need_sync = True
+                break
+        if need_sync:
             await self._sync_verbs_and_packs_to_redis()
 
         queue_key = RedisKeys.user_verbs(telegram_id)
@@ -74,20 +82,19 @@ class PackService(BaseService):
 
     async def _sync_verbs_and_packs_to_redis(self) -> None:
         """
-        Выполняет полную синхронизацию данных из БД в Redis.
+        Полная синхронизация данных из API в Redis.
 
-        Загружает список всех паков и их содержимое (глаголы с примерами).
-        Устанавливает длительное время жизни (15 дней) для снижения нагрузки на БД.
-        Использует Pipeline для атомарной и быстрой записи данных.
+        Загружает:
+        - Список всех паков (кэшируется на время TTL)
+        - Для каждого пака — список глаголов с формами и примерами (кэшируется на время TTL)
         """
-
-        TIME = 60 * 60 * 24 * 15  # 15 дней
+        TTL = 60 * 60 * 24 * 15  # 15 дней
 
         packs = await self._request(method="GET", endpoint="packs/")
         await self.redis.set(
             RedisKeys.packs_list(),
             json.dumps(packs, ensure_ascii=False),
-            ex=TIME,
+            ex=TTL,
         )
 
         for pack in packs:
@@ -101,5 +108,5 @@ class PackService(BaseService):
             for verb in verbs:
                 pipe.rpush(queue_key, json.dumps(verb, ensure_ascii=False))
 
-            await pipe.expire(queue_key, TIME)
+            await pipe.expire(queue_key, TTL)
             await pipe.execute()

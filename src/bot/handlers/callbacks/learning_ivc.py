@@ -40,7 +40,10 @@ async def cb_start_pack_selection(
     )
 
 
-@router.callback_query(LearningStates.select_pack)
+@router.callback_query(
+    (F.data.startswith("pack_")) | (F.data == LearningKbCallbacks.RANDOM_IVC),
+    LearningStates.select_pack,
+)
 async def cb_init_ivc_learning(
     callback: CallbackQuery, state: FSMContext, redis: Redis
 ):
@@ -64,7 +67,10 @@ async def cb_init_ivc_learning(
     return await _show_ivc_original(callback, verb)
 
 
-@router.callback_query(LearningStates.ivc_showing_answer)
+@router.callback_query(
+    F.data == LearningKbCallbacks.NEXT_VERB,
+    LearningStates.ivc_showing_answer,
+)
 async def cb_load_next_verb(callback: CallbackQuery, state: FSMContext, redis: Redis):
     """
     Обрабатывает переход к следующему глаголу после просмотра ответа.
@@ -114,7 +120,9 @@ async def _show_ivc_original(callback: CallbackQuery, verb: dict):
     v1 = verb.get("v_1")
     ex_v1 = verb.get("v_1_example")
 
-    text = f"🇬🇧 <b>{v1}</b>\n\n<i>Example:</i> {ex_v1}"
+    text = f"🇬🇧 <b>{v1}</b>"
+    if ex_v1:
+        text += f"\n\n<i>Example:</i> {ex_v1}"
 
     await callback.message.edit_text(
         text=text,
@@ -127,10 +135,10 @@ async def _show_ivc_answer(callback: CallbackQuery, verb: dict):
     Отображает цепочку форм (V1-V2-V3), общий перевод и три блока
     с примерами использования для каждой формы с их переводами.
     """
-    v1 = verb.get("v_1")
-    v2 = verb.get("v_2")
-    v3 = verb.get("v_3")
-    translation = verb.get("translation")
+    v1 = verb.get("v_1", "")
+    v2 = verb.get("v_2", "")
+    v3 = verb.get("v_3", "")
+    translation = verb.get("translation", "")
 
     ex1 = verb.get("v_1_example")
     tr1 = verb.get("v_1_example_translation")
@@ -139,19 +147,28 @@ async def _show_ivc_answer(callback: CallbackQuery, verb: dict):
     ex3 = verb.get("v_3_example")
     tr3 = verb.get("v_3_example_translation")
 
-    text = (
-        f"⚡️ <b>{v1} — {v2} — {v3}</b>\n"
-        f"🇷🇺 {translation}\n\n"
-        f"🔹 <b>Infinitive:</b>\n"
-        f"<i>{ex1}</i>\n"
-        f"({tr1})\n\n"
-        f"🔸 <b>Past Simple:</b>\n"
-        f"<i>{ex2}</i>\n"
-        f"({tr2})\n\n"
-        f"🔹 <b>Participle II:</b>\n"
-        f"<i>{ex3}</i>\n"
-        f"({tr3})"
-    )
+    text = f"⚡️ <b>{v1} — {v2} — {v3}</b>\n" f"🇷🇺 {translation}"
+
+    if ex1 or tr1:
+        text += "\n\n🔹 <b>Infinitive:</b>\n"
+        if ex1:
+            text += f"<i>{ex1}</i>\n"
+        if tr1:
+            text += f"({tr1})"
+
+    if ex2 or tr2:
+        text += "\n\n🔸 <b>Past Simple:</b>\n"
+        if ex2:
+            text += f"<i>{ex2}</i>\n"
+        if tr2:
+            text += f"({tr2})"
+
+    if ex3 or tr3:
+        text += "\n\n🔹 <b>Participle II:</b>\n"
+        if ex3:
+            text += f"<i>{ex3}</i>\n"
+        if tr3:
+            text += f"({tr3})"
 
     await callback.message.edit_text(
         text=text,

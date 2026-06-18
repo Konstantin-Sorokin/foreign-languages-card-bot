@@ -6,6 +6,7 @@ from bot.utils import COMMANDS
 
 
 async def main():
+    """Запускает бота: настраивает логирование, создаёт диспетчер и бота, устанавливает команды и запускает polling."""
     logging.basicConfig(level=logging.INFO)
 
     dp = create_dispatcher()

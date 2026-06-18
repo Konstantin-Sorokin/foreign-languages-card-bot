@@ -5,6 +5,12 @@ from bot.utils.constants import LearningKbCallbacks, LearningKbTexts
 
 
 def build_pack_selection_kb(packs: list[dict]) -> InlineKeyboardMarkup:
+    """
+    Создаёт клавиатуру для выбора пака глаголов.
+
+    Для каждого пака создаётся кнопка с его названием и callback_data: pack_{id}.
+    В конце добавляется кнопка "Случайные глаголы" для перемешивания всех паков.
+    """
     builder = InlineKeyboardBuilder()
     all_packs = []
     for pack in packs:
