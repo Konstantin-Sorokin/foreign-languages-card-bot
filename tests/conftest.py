@@ -25,11 +25,15 @@ def mock_redis() -> MagicMock:
     mock.pipeline = MagicMock()
 
     # Мок для pipeline
+    # rpush — синхронный (только буферизирует команду, не делает запрос)
+    # expire/execute — асинхронные
     pipe_mock = MagicMock()
-    pipe_mock.rpush = AsyncMock()
+    pipe_mock.rpush = MagicMock()
     pipe_mock.delete = AsyncMock()
     pipe_mock.expire = AsyncMock()
     pipe_mock.execute = AsyncMock()
+    pipe_mock.__aenter__ = AsyncMock()
+    pipe_mock.__aexit__ = AsyncMock()
     mock.pipeline.return_value = pipe_mock
 
     return mock
