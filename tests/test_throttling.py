@@ -56,9 +56,7 @@ class TestThrottlingMiddleware:
         assert result == "handler_result"
         mock_handler.assert_awaited_once_with(mock_event_no_user, {})
 
-    async def test_unknown_event_type_passes(
-        self, mock_redis, mock_handler
-    ):
+    async def test_unknown_event_type_passes(self, mock_redis, mock_handler):
         """Тип события не зарегистрирован в rate_limits → handler вызывается."""
         event = self._make_event()
 
@@ -69,9 +67,7 @@ class TestThrottlingMiddleware:
         assert result == "handler_result"
         mock_handler.assert_awaited_once_with(event, {})
 
-    async def test_first_request_passes(
-        self, mock_redis, mock_handler
-    ):
+    async def test_first_request_passes(self, mock_redis, mock_handler):
         """Первый запрос (Redis None) → handler вызывается + setex."""
         event = self._make_event()
 
@@ -85,9 +81,7 @@ class TestThrottlingMiddleware:
         mock_handler.assert_awaited_once_with(event, {})
         mock_redis.setex.assert_awaited_once()
 
-    async def test_request_within_limit_blocked(
-        self, mock_redis, mock_handler
-    ):
+    async def test_request_within_limit_blocked(self, mock_redis, mock_handler):
         """Запрос в пределах лимита → handler НЕ вызывается."""
         event = self._make_event()
 
@@ -99,9 +93,7 @@ class TestThrottlingMiddleware:
 
         mock_handler.assert_not_awaited()
 
-    async def test_request_after_limit_passes(
-        self, mock_redis, mock_handler
-    ):
+    async def test_request_after_limit_passes(self, mock_redis, mock_handler):
         """Запрос после истечения лимита → handler вызывается."""
         event = self._make_event()
 
@@ -115,9 +107,7 @@ class TestThrottlingMiddleware:
         mock_handler.assert_awaited_once_with(event, {})
         mock_redis.setex.assert_awaited_once()
 
-    async def test_callback_within_limit_answer_called(
-        self, mock_redis, mock_handler
-    ):
+    async def test_callback_within_limit_answer_called(self, mock_redis, mock_handler):
         """
         CallbackQuery в пределах лимита → handler НЕ вызывается,
         вызывается event.answer() с предупреждением.
@@ -131,13 +121,9 @@ class TestThrottlingMiddleware:
         await middleware(mock_handler, event, {})
 
         mock_handler.assert_not_awaited()
-        event.answer.assert_awaited_once_with(
-            "⏳ Слишком часто!", show_alert=False
-        )
+        event.answer.assert_awaited_once_with("⏳ Слишком часто!", show_alert=False)
 
-    async def test_different_user_ids_isolated(
-        self, mock_redis, mock_handler
-    ):
+    async def test_different_user_ids_isolated(self, mock_redis, mock_handler):
         """Разные пользователи не влияют друг на друга."""
         middleware1 = ThrottlingMiddleware(mock_redis)
         event1 = self._make_event(user_id=12345)
