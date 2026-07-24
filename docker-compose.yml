@@ -7,23 +7,8 @@ services:
       - .env
     restart: unless-stopped
     networks:
-      - bot_internal
       - flc_backend
-    depends_on:
-      - redis
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    networks:
-      - bot_internal
-
-volumes:
-  redis_data:
 
 networks:
   flc_backend:
     external: true
-  bot_internal:
