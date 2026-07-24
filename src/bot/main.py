@@ -1,18 +1,29 @@
 import asyncio
-import logging
 
-from bot.creator import create_bot, create_dispatcher
-from bot.utils import COMMANDS
+from bot.core.logging import configure_logging
+from bot.creator import (
+    create_dispatcher,
+    create_resources,
+    setup_bot,
+    shutdown_resources,
+)
 
 
 async def main():
-    """Запускает бота: настраивает логирование, создаёт диспетчер и бота, устанавливает команды и запускает polling."""
-    logging.basicConfig(level=logging.INFO)
+    """Application entry point."""
+    configure_logging()
 
-    dp = create_dispatcher()
-    bot = create_bot()
-    await bot.set_my_commands(COMMANDS)
-    await dp.start_polling(bot)
+    resources = await create_resources()
+
+    await setup_bot(resources)
+
+    dp = create_dispatcher(resources)
+    asyncio.create_task(resources.notification_consumer.start())
+
+    try:
+        await dp.start_polling(resources.bot)
+    finally:
+        await shutdown_resources(resources)
 
 
 if __name__ == "__main__":
